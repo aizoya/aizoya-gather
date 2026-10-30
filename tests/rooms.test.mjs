@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {roomDetails,ballot,agreement,digest,secret} from '../lib/rooms.mjs';
+const picks=[{id:'a',name:'A'},{id:'b',name:'B'}];
+test('ballot requires a real choice for every candidate',()=>{assert.throws(()=>ballot({a:1},picks));assert.throws(()=>ballot({a:true,b:0},picks));assert.throws(()=>ballot({a:1,b:0,extra:1},picks));assert.deepEqual(ballot({a:1,b:-1},picks),{a:1,b:-1});});
+test('individual votes do not become outcomes until all expected seats submit',()=>assert.deepEqual(agreement(picks,[{a:1,b:0}],2),{complete:false,choices:[]}));
+test('a pass blocks agreement and maybe is not counted as love',()=>{const r=agreement(picks,[{a:1,b:0},{a:-1,b:0}],2);assert.equal(r.complete,true);assert.deepEqual(r.choices.map(p=>p.id),['b']);assert.equal(r.choices[0].total,0);});
+test('all pass produces no fabricated winner',()=>assert.equal(agreement(picks,[{a:-1,b:-1},{a:-1,b:-1}],2).choices.length,0));
+test('most love wins among choices without a pass',()=>assert.equal(agreement(picks,[{a:0,b:1},{a:0,b:1}],2).choices[0].id,'b'));
+test('date and title validation reject invalid dates and past dates',()=>{const date=new Date(Date.now()+86400000).toISOString().slice(0,10);assert.equal(roomDetails({title:'Weekend',date}).date,date);assert.throws(()=>roomDetails({title:'Weekend',date:'2026-02-31'}));assert.throws(()=>roomDetails({title:'Weekend',date:'2020-01-01'}));});
+test('room tokens have independent entropy and only hashes are persisted',async()=>{const a=secret(),b=secret();assert.match(a,/^[0-9a-f]{64}$/);assert.notEqual(a,b);assert.notEqual(await digest(a),a);assert.equal((await digest(a)).length,64);});
+import {makeCalendar} from '../lib/rooms.mjs';
+test('calendar has CRLF records, UTC timestamp and escaped untrusted fields',()=>{const ics=makeCalendar({name:'One, Two\nOther'},{date:'2026-12-31',location:'Oakland; CA'},new Date('2026-10-30T06:00:00.123Z'));assert(ics.includes('\r\nDTSTAMP:20261030T060000Z\r\n'));assert(ics.includes('DTEND;VALUE=DATE:20270101'));assert(ics.includes('SUMMARY:One\\, Two\\nOther'));assert(ics.includes('LOCATION:Oakland\\; CA'));assert(!ics.includes('SUMMARY:One, Two\nOther'));});
