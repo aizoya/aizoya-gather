@@ -22,3 +22,6 @@ test('budget errors preserve actionable status through adapter',async()=>{const 
 test('overall planning deadline cancels an in-flight call with actionable timeout',async()=>{await assert.rejects(plan({members,category:'movie'},'key',async(url,options)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>resolve(Response.json({results:{entities:[]}})),100);options.signal.addEventListener('abort',()=>{clearTimeout(timer);reject(options.signal.reason);},{once:true});}),{timeoutMs:5}),e=>e.status===504&&e.message.includes('timed out'));});
 
  test("redirects fail closed with Worker-compatible manual mode", async()=>{let calls=0;await assert.rejects(search({query:"Inception",type:"movie"},"test-key",async(url,options)=>{calls++;assert.equal(options.redirect,"manual");return new Response(null,{status:302,headers:{Location:"https://example.invalid"}});}),e=>e.status===502);assert.equal(calls,1);});
+
+test("four people accepted and five rejected",()=>{assert.equal(validatePlan({members:[...members,...members],category:"movie"}).members.length,4);assert.throws(()=>validatePlan({members:[...members,...members,members[0]],category:"movie"}));});
+test("shortlist offers four distinct choices",()=>{const list=[a,b,c,{id:"d",name:"Delta"},{id:"e",name:"Epsilon"}];assert.equal(rankGroup([list,list],members).length,4);});
