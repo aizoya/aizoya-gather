@@ -1,0 +1,1 @@
+ALTER TABLE `gather_rooms` ADD `rejected` text DEFAULT '[]' NOT NULL;

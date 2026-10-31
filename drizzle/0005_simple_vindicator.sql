@@ -1,0 +1,1 @@
+ALTER TABLE `gather_rooms` ADD `discovery_mode` text DEFAULT 'events' NOT NULL;

@@ -1,47 +1,51 @@
 # AIZOYA Gather
 
-A group decision tool for two or three people. Resolve one cultural favorite per person, retrieve separate Qloo taste lists, prioritize shared candidates, and replan when a choice is rejected.
+Gather helps a group turn independent preferences into a shared plan. The current prototype combines OpenAI conversational intake, Tavily web discovery, Qloo cultural taste matching, invitation rooms, private ballots, and agreement reveal. Hosting uses Vinext on Cloudflare Workers with D1.
 
-## Status
+## Current verification
 
-Prototype built October 29, 2026 for the Qloo Agentic Hackathon. Qloo API access has been requested; **no live Qloo calls have been verified**. Fictional sample mode demonstrates the workflow and is explicitly labeled. This is not yet a qualifying live submission. No customers, revenue, or performance superiority are claimed.
+The deployed source before this documentation update is `5d78117264f5fbf76d62f3bed9500aa609cda4e7`. On October 30, 2026, a fresh hosted synthetic two-person flow completed live OpenAI and Tavily discovery, source-backed October 31 Oakland comedy listings, exact Qloo venue matching, private ballots, and agreement reveal. Both accepted listings were at Quinn’s Lighthouse; their prices remained unknown. A pass removed one listing from agreement. This demonstrates that flow, not broad geographic coverage or guaranteed availability.
 
-## Run
+The latest implementation passed 82 automated tests, TypeScript checking, and the managed build. These checks do not replace a real two-device mobile review. Public demo access and MIT source publication are approved. Devpost submission is not yet confirmed.
 
-Node 22.13+ and pnpm. `pnpm install --frozen-lockfile`, then `pnpm dev`. The Sites starter uses Vinext and Cloudflare Workers. Configure `QLOO_API_KEY` as a server runtime secret, using local `.dev.vars` for Wrangler or the hosting provider's secret management. Never prefix it with NEXT_PUBLIC or put it in source. See `.env.example` for the variable name. The browser never receives the key.
+## Main flows
 
-Checks: `node --test tests/*.test.mjs`; `pnpm exec tsc --noEmit`; `node /root/.codex/plugins/cache/openai-curated-remote/sites/1.1.2/scripts/build-site.mjs` in the managed Sites environment. Portable build: `pnpm build`.
+- Start a room, choose a date, city, group size (2–4), and discovery mode; share its link before collecting preferences.
+- Each participant confirms private preferences. Event mode accepts natural-language input; Qloo taste modes require selected cultural favorites.
+- For new event discovery, OpenAI prepares a bounded query, Tavily retrieves source pages, and candidate validation requires an exact source excerpt containing the event name and requested date. Unknown prices remain unknown.
+- Optional Qloo venue checks require source-backed venue/address evidence and an unambiguous entity match. Venue taste ranks describe retrieved venue overlap, not enjoyment probabilities or event availability.
+- Participants privately vote Yes, Maybe, or Pass. Agreement appears after all ballots are submitted; a pass excludes that option from agreement.
+- Source and booking links appear with recommendations. Apple Maps and Google Maps directions use sourced addresses.
 
-## Architecture
+The older individual taste planner also supports exclusions and replanning. After a completed deadlock, the host can open another round in the same room. Preferences persist, ballots reset, and rejected options are excluded. Discovery starts separately under the existing provider allowance.
 
-- `app/page.tsx`: intake, explicit entity disambiguation, result comparison, shortlist, rejection and trace.
-- `app/api/gather/route.ts`: same-origin bounded JSON interface; no raw upstream error or key disclosure.
-- `lib/gather.mjs`: injected-fetch API adapter, validation, deterministic ranking, fictional fixture.
-- `tests/gather.test.mjs`: policy and adapter tests with fictional upstream fixtures.
+## Server components
 
-Qloo calls: `GET https://hackathon.api.qloo.com/search` with `query`, `types=urn:entity:<type>`, `take=5`; `GET /v2/insights` with `filter.type`, a single `signal.interests.entities` per person, optional `filter.location.query` for places, `filter.exclude.entities`, and `take=12`, then at most one `take=24` recovery pass if no option appears for everyone. Header: `X-Api-Key`. Documented interface must still be confirmed against the actual granted key. See https://docs.qloo.com/reference/qloo-llm-hackathon-developer-guide and https://github.com/qloo/docs-public.
+- `lib/gather.mjs`: Qloo entity/tag resolution and per-person recommendation retrieval, bounded concurrency, deadline-aware cancellation, and evidence-based group ranking.
+- `lib/grounded-discovery.mjs`: bounded OpenAI intake and candidate extraction with source/date/price validation.
+- `lib/tavily.mjs`: basic search and extraction; classified authentication, quota, spending, rate-limit, timeout, network, and provider errors.
+- `lib/venue-taste.mjs`: source-backed venue extraction, exact venue resolution, and candidate-filtered Qloo ranking.
+- `lib/discovery-invitation.mjs`: short-lived signed shortlist receipts.
+- `app/api/rooms/route.ts`: participant credentials, private intake, discovery locks, ballots, and agreement.
+- `lib/budget.mjs` and `lib/discovery-budget.mjs`: atomic D1 provider request controls and a conservative test allowance. Reservations can count even when a provider fails.
 
-## Decision policy
+## Local setup and checks
 
-A bounded tool workflow: resolve → ask the person to select the entity → retrieve each taste list → compare → rank → display evidence → exclude on rejection and rerun. No LLM is required by this version. Do not claim autonomous reasoning or LLM capabilities.
+Use Node 22.13+ and pnpm. Install with `pnpm install --frozen-lockfile`; start with `pnpm dev`.
 
-Candidates are ordered by number of people whose retrieved list contains the candidate (12 initially, up to 24 after one recovery pass), then worst rank (missing = 1000), then mean rank, then entity ID for deterministic ties. This favors broad representation; it is a product policy, not a measured fairness guarantee. Rank positions are not satisfaction probabilities. An absent result means outside the retrieved list, not dislike. Returned ranks depend on Qloo ordering. No invented venue hours, dietary assurances, prices, travel times, or availability. Shortlists live only in React session memory.
+Configure `OPENAI_API_KEY`, `TAVILY_API_KEY`, and `QLOO_API_KEY` as server-only runtime secrets. Never expose them through NEXT_PUBLIC variables, source, screenshots, or logs. Hosted Qloo configuration does not imply a local Qloo key exists. Apply the append-only D1 migrations through the supported hosting workflow.
 
-## Before public release / submission
+Run `node --test tests/*.test.mjs`, `pnpm exec tsc --noEmit`, and `pnpm build`. Managed Sites builds use the supplied Sites build helper. Provider tests should use injected fixtures unless a live call is explicitly intended and within the authorized allowance.
 
-1. Install the actual key securely and resolve real entities end-to-end.
-2. Confirm `/search` and `/v2/insights` shapes and location parameter behavior against official docs and live responses; adapt without committing response data.
-3. Test real shared/partial/no-result/error cases and three-person replanning.
-4. Verify the D1 migration and shared request budget on the hosted environment. The adapter now reserves an atomic global budget before every upstream request: 3/second, 60/minute, and 1,000/UTC day. Missing or failed D1 access prevents the call. Counters store no visitor data. A denied reservation changes no counters. A successfully reserved call still counts if the provider fails; no refund is attempted. Second-window collisions wait at most twice, while minute/day exhaustion returns a limit error. Limits are fixed windows, not a complete anti-abuse service, and must fit the actual key quota. Same-origin checks alone are not abuse protection.
-5. Approve external publication and open-source license, create a public repository, publish a working demo, and test it anonymously on phone and desktop.
-6. Complete Devpost text/screenshots using only verified behavior. No demo video is required according to the reviewed overview.
+## Privacy and limits
 
-## Data
+A room link grants room access; participant tokens identify individual seats. Shared state must not expose another participant’s raw preferences or unrevealed ballot. Provider consent explains the relevant data transfer. Qloo receives selected cultural signals and search/location parameters, not participant names or email addresses. OpenAI and Tavily process discovery inputs and queries; precise home addresses should not be placed in prompts.
 
-Only chosen taste IDs, a city, and exclusions are sent to Qloo. Person labels are generated locally (Person 1, etc.). No account or analytics is implemented in the app. Hosting may apply its own access boundary and logging. No raw Qloo data is stored in this repository. Fictional sample fixtures are invented. API keys and local environment files are ignored by Git.
+Room access expires, but records are not automatically purged from D1. Persistent preference learning, payments, booking, verified showtime inventory, comprehensive activity coverage, are not implemented. Budget and distance are not universally verified hard filters. Unknown information must remain visibly unknown. Retrieved listings can change or sell out.
 
-## Request budget
+Before public release: verify real-device sharing and privacy, resolve retention/deletion and abuse controls, approve audience changes, and complete the submission requirements against current official rules. Do not describe the prototype as a verified booking or availability service.
 
-`lib/budget.mjs` reserves all three windows atomically in a single SQLite UPSERT on one `api_budget_gate` row. Reservations rejected by any window change no counters. The older three-row table remains for migration history but is no longer used. A second-window collision can wait at most twice before returning an error; daily/minute exhaustion does not retry. Quota errors remain actionable HTTP 429 responses. No upstream provider retries are performed. Fixed windows are conservative demo controls, not a complete anti-abuse service. The limit must be checked against the actual key entitlement. `drizzle/0001_lonely_puma.sql` adds the new gate; do not rewrite applied migrations. No Qloo response data, user identifiers, or tastes are stored in D1.
+## Public demo
+https://gather.aizoya.com
 
-A plan receives a shared 25-second cancellation signal for upstream calls. Database latency and bounded pacing can add overhead; this is not a hard wall-clock completion guarantee. If top-12 lists contain candidates but no shared option, the policy widens once to top 24 without changing interests, geography, or exclusions. The trace shows the recovery decision. Empty lists do not trigger another pass. Partial results remain labeled partial. All recovery behavior is verified with fictional test data, not yet with live Qloo responses.
+OpenAI/Tavily discovery is paused at its bounded test limit. Qloo taste discovery uses a separate quota.

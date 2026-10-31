@@ -1,0 +1,1 @@
+ALTER TABLE `gather_players` ADD `preferences` text;

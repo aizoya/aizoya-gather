@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793315197831,
+      "tag": "0000_ambiguous_boom_boom",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793319309140,
+      "tag": "0001_lonely_puma",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793340655733,
+      "tag": "0002_opposite_colleen_wing",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793340936133,
+      "tag": "0003_mixed_lenny_balinger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793396724724,
+      "tag": "0004_zippy_la_nuit",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793398603258,
+      "tag": "0005_simple_vindicator",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793402792162,
+      "tag": "0006_common_barracuda",
+      "breakpoints": true
+    }
+  ]
+}
