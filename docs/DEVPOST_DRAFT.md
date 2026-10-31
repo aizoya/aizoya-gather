@@ -38,7 +38,7 @@ Private group input required server-level protection. Other participants’ raw 
 ## Accomplishments we are proud of
 We verified a fresh hosted flow through OpenAI, Tavily source retrieval, exact Qloo venue matching, private ballots, and agreement reveal. Two October 31 Oakland comedy listings passed the source checks; both were at the same venue and prices remained unknown.
 
-The implementation passes 82 automated tests, TypeScript checks, and build checks. Integration assertions cover repeated deadlocks, persistent exclusions, provider duplicates, private inputs, and host-only replanning. A separate deployed synthetic test verified same-invitation reset and preserved preferences without provider calls.
+The implementation passes 84 automated tests, TypeScript checks, and build checks. Integration assertions cover repeated deadlocks, persistent exclusions, provider duplicates, private inputs, and host-only replanning. A separate deployed synthetic test verified same-invitation reset and preserved preferences without provider calls.
 
 These are prototype verification results, not evidence of broad coverage, customer adoption, or superior recommendation quality.
 
@@ -52,7 +52,7 @@ Complete real two-device mobile testing, strengthen event identity deduplication
 Qloo API; OpenAI API; Tavily; React; TypeScript; Vinext; Cloudflare Workers; Cloudflare D1; Drizzle; CSS.
 
 ## Judge walkthrough
-1. Open the published demo. PUBLIC ACCESS PENDING APPROVAL.
+1. Open the published demo. Public access is configured; anonymous room verification is being checked.
 2. Choose Places, Movies, or Music, enter a city and planning date, and tap Start a room.
 3. Copy the invitation into a second browser profile/device. Join the second seat.
 4. Each participant selects at least one cultural favorite and confirms privately.
@@ -60,18 +60,18 @@ Qloo API; OpenAI API; Tavily; React; TypeScript; Vinext; Cloudflare Workers; Clo
 6. Inspect Qloo list representation and individual ranks. These are relative rankings, not enjoyment probabilities.
 7. Cast a ballot from each seat and view the shared result.
 8. To test deadlock recovery, Pass every option from one seat. After reveal, the host opens another round; preferences remain and rejected options are excluded.
-9. Optional live event mode uses the separately capped OpenAI/Tavily allowance. Provider limits may prevent another retrieval; do not present cached or synthetic data as a new live search.
+9. Optional live event mode uses the separately capped OpenAI/Tavily allowance, extended by eight attempts with owner approval. Provider limits may prevent another retrieval; do not present cached or synthetic data as a new live search.
 
 ## Links and release gates
-Demo: https://gather.aizoya.com — deployed, currently OWNER-PRIVATE; not yet an eligible public demo.
-Public source: PENDING. Must contain sanitized source, assets, installation instructions and a detectable open-source license.
-Latest deployed commit: 34c0eb9afdd7571e6edf434de38619a641de943b.
+Demo: https://gather.aizoya.com — public access configured; anonymous verification pending.
+Public source: https://github.com/aizoya/aizoya-gather — MIT license, current source, tests and assets published. Sanitized build manifest included; portable build passed using installed dependencies.
+Latest deployed commit: 2ba09425590a8c09c57fa94784b279d0c19ecde5.
 Deadline: October 30, 2026, 11:45 PM Eastern / 8:45 PM Pacific. Internal target: 8:30 PM Pacific.
 Official rules: https://qloo.devpost.com/rules
 Official requirements: https://qloo.devpost.com/
 Submission page: https://devpost.com/submit-to/31054-qloo-agent-hackathon/manage/submissions
 
-Before final submit: approve public demo and source/license release; inspect sanitized repository; verify anonymous demo and source access; confirm provider allowance supports judge use; capture current clean mobile screenshots; paste fields; verify Devpost confirms submission. No video is required. Registration and submission status have not been verified in the signed-in account.
+Before final submit: public demo and MIT source release approved; verify sanitized repository; verify anonymous demo and source access; confirm provider allowance supports judge use; capture current clean mobile screenshots; paste fields; verify Devpost confirms submission. No video is required. Registration and submission status have not been verified in the signed-in account.
 
 ## Claims to avoid
 Do not claim verified availability, booking, guaranteed budgets or distance filtering, automatic personal learning, proven fairness, measured superiority over LLM-only recommendations, or completed real two-device testing. Do not imply Qloo supplies live event schedules. No customers or revenue are claimed.

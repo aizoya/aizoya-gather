@@ -3,6 +3,7 @@ import {confirmedPreferences,groupDiscoveryMessages} from '../../../lib/group-in
 import {groundedDiscover} from '../../../lib/grounded-discovery.mjs';
 import {issueDiscoveryInvitation} from '../../../lib/discovery-invitation.mjs';
 import {applyVenueTaste,verifiedVenue} from '../../../lib/venue-taste.mjs';
+import {conversation} from '../../../lib/discovery.mjs';
 import {reserveDiscovery} from '../../../lib/discovery-budget.mjs';
 import {readDiscoveryInvitation} from '../../../lib/discovery-invitation.mjs';
 import {GatherError,plan,validatePlan} from '../../../lib/gather.mjs';
@@ -128,13 +129,13 @@ export async function POST(request:Request){try{
    if(!saved)throw new GatherError('This discovery attempt expired. Reload the room.',409);
   }else{
   const messages=groupDiscoveryMessages(room,preferences);
-  if(rejected.length)messages[0].content+=' Find different options. Previously rejected names: '+JSON.stringify(rejected.map(p=>p.name)).slice(0,1200)+'.';
+  if(rejected.length)messages[0].content+=' Find different options. Previously rejected names: '+JSON.stringify(rejected.map(p=>p.name)).slice(0,400)+'.';
    const eventStarted=Date.now();
    let found;
    if(storedPicks.length){found={city:room.location,checkedAt:storedPicks[0].checkedAt,candidates:storedPicks.map((p:{name:string;sourceUrl:string;dateQuote:string;price:number|null;venueQuote?:string;address?:string})=>({name:p.name,url:p.sourceUrl,eventDate:room.date,dateQuote:p.dateQuote,price:p.price,venue:verifiedVenue({dateQuote:p.dateQuote,venueName:null,venueAddress:null,venueQuote:null},p.dateQuote.replace(/\s+/g,' ').trim(),p.name)}))};}
-   else{await reserveDiscovery(env.DB);found=await groundedDiscover(messages,config.OPENAI_API_KEY,config.TAVILY_API_KEY);}
+   else{conversation(messages);await reserveDiscovery(env.DB);found=await groundedDiscover(messages,config.OPENAI_API_KEY,config.TAVILY_API_KEY);}
    const result=await applyVenueTaste(found,preferences,config.QLOO_API_KEY,budgetedFetch(env.DB),{timeoutMs:Math.min(12000,55000-(Date.now()-eventStarted))});
-   result.candidates=result.candidates.filter((p:{name:string;url:string})=>!rejected.some(r=>r.name.trim().toLowerCase()===p.name.trim().toLowerCase()));
+   result.candidates=(result.candidates||[]).filter((p:{name:string;url:string})=>!rejected.some(r=>r.name.trim().toLowerCase()===p.name.trim().toLowerCase()));
    const receipt=await issueDiscoveryInvitation(result,config.OPENAI_API_KEY);
    if(!receipt)throw new GatherError('No dated listings passed the evidence checks. Preferences are saved; discuss a broader search before trying again.',422);
    const discovery=await readDiscoveryInvitation(receipt,config.OPENAI_API_KEY);

@@ -6,7 +6,7 @@ Gather helps a group turn independent preferences into a shared plan. The curren
 
 The deployed source before this documentation update is `5d78117264f5fbf76d62f3bed9500aa609cda4e7`. On October 30, 2026, a fresh hosted synthetic two-person flow completed live OpenAI and Tavily discovery, source-backed October 31 Oakland comedy listings, exact Qloo venue matching, private ballots, and agreement reveal. Both accepted listings were at Quinn’s Lighthouse; their prices remained unknown. A pass removed one listing from agreement. This demonstrates that flow, not broad geographic coverage or guaranteed availability.
 
-The latest implementation passed 82 automated tests, TypeScript checking, and the managed build. These checks do not replace a real two-device mobile review. Public demo access and MIT source publication are approved. Devpost submission is not yet confirmed.
+The latest implementation passed 84 automated tests, TypeScript checking, and the managed build. These checks do not replace a real two-device mobile review. Public demo access and MIT source release are approved. Hackathon submission is not yet confirmed.
 
 ## Main flows
 
@@ -44,8 +44,3 @@ A room link grants room access; participant tokens identify individual seats. Sh
 Room access expires, but records are not automatically purged from D1. Persistent preference learning, payments, booking, verified showtime inventory, comprehensive activity coverage, are not implemented. Budget and distance are not universally verified hard filters. Unknown information must remain visibly unknown. Retrieved listings can change or sell out.
 
 Before public release: verify real-device sharing and privacy, resolve retention/deletion and abuse controls, approve audience changes, and complete the submission requirements against current official rules. Do not describe the prototype as a verified booking or availability service.
-
-## Public demo
-https://gather.aizoya.com
-
-An owner-approved extension permits eight additional discovery attempts; provider and application quotas remain enforced. Qloo taste discovery uses a separate quota.
