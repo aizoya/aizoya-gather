@@ -48,4 +48,4 @@ Before public release: verify real-device sharing and privacy, resolve retention
 ## Public demo
 https://gather.aizoya.com
 
-OpenAI/Tavily discovery is paused at its bounded test limit. Qloo taste discovery uses a separate quota.
+An owner-approved extension permits eight additional discovery attempts; provider and application quotas remain enforced. Qloo taste discovery uses a separate quota.
